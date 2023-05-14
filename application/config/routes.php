@@ -63,6 +63,7 @@ $route['desasignar-perfil'] = "UsuariosController/eliminarPerfilUsuario";
 $route['listado-perfiles'] = "UsuariosController/getTodosPerfiles";
 $route['perfiles-usuario'] = "UsuariosController/getPerfilesUsuario";
 $route['perfiles-actual-usuario'] = "UsuariosController/perfilesActualUsuario";
+$route['restaurar-usuario'] = "UsuariosController/restaurarUsuario";
 
 // todo lo relevante a productos
 $route['listar-categorias'] = "ProductosController/getCategorias";

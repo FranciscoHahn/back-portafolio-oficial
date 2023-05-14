@@ -3,9 +3,12 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class ClientesModel extends CI_Model {
+    
+    private $jwt;
 
     public function __construct() {
         parent::__construct();
+        $this->jwt = new JWT();
         $this->load->database(); // Carga la base de datos configurada en CodeIgniter
     }
 
@@ -225,15 +228,13 @@ class ClientesModel extends CI_Model {
 
     public function token($data) {
         $jwt = new JWT();
-        $JwtSecretKey = "MiLlaveSecreta.portafolio.2023";
-        $token = $jwt->encode($data, $JwtSecretKey, 'HS256');
+        $token = $jwt->encode($data, SECRET_KEY, ENCODE);
         return $token;
     }
 
-    public function decode_token($token) {
+    public function decode_token($token) {        
         $jwt = new JWT();
-        $JwtSecretKey = "MiLlaveSecreta.portafolio.2023";
-        $decoded_token = $jwt->decode($token, $JwtSecretKey, array('HS256'));
+        $decoded_token = $jwt->decode($token, SECRET_KEY, ENCODE);
         return $decoded_token;
     }
 

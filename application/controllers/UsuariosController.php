@@ -25,13 +25,12 @@ class UsuariosController extends CI_Controller {
         $apellidos = $this->input->post('apellidos');
         $rut = $this->input->post('rut');
         $dvrut = $this->input->post('dvrut');
-        $logintoken = '';
         $telefono = $this->input->post('telefono');
         $password = $this->input->post('password');
         $email = $this->input->post('email');
         $username = $this->input->post('username');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->insertarUsuario($token, $nombres, $apellidos, $rut, $dvrut, $logintoken, $telefono, $password, $email, $username);
+        $response = $this->UsuariosModel->insertarUsuario($token, $nombres, $apellidos, $rut, $dvrut, $telefono, $password, $email, $username);
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
@@ -58,7 +57,15 @@ class UsuariosController extends CI_Controller {
         // Obtenemos los datos del usuario a eliminar
         $usuarioId = $this->input->post('id');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->eliminarUsuario($usuarioId);
+        $response = $this->UsuariosModel->eliminarUsuario($token, $usuarioId);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function restaurarUsuario() {
+        $usuarioId = $this->input->post('id');
+        $token = $this->input->post('token');
+        $response = $this->UsuariosModel->restaurarUsuario($token, $usuarioId);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
@@ -104,14 +111,19 @@ class UsuariosController extends CI_Controller {
         echo json_encode($result);
     }
 
-    public function perfilesActualUsuario(){
+    public function perfilesActualUsuario() {
         $token = $this->input->post('token');
         $result = $this->UsuariosModel->getPerfilesUsuarioActual($token);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($result);
     }
+
     public function list_user() {
         echo json_encode($this->db->query('select * from usuarios')->result_array());
+    }
+
+    public function gteusr() {
+        echo json_encode($this->UsuariosModel->buscarPorId(3));
     }
 
 }

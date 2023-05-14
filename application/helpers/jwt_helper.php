@@ -183,4 +183,78 @@ class JWT {
         );
     }
 
+    public function generar($data) {
+        return $this->encode($data, SECRET_KEY, ENCODE);
+    }
+
+    public function decodificar($token) {
+        return $this->decode($token, SECRET_KEY, ENCODE);
+    }
+
+    public function getProperty($token, $property = null) {
+        $data = $this->decodificar($token);
+        if (!isset($data->$property)) {
+            return 0;
+        }
+        return $data->$property;
+    }
+
+    public function verificarPropiedad($token, $property, $propertyKey = null, $compare = null) {
+        $data = $this->getProperty($token, $property);
+        if (!$data) {
+            return array("result" => false, "sysmsg" => "no existe la propiedad", "usrmsg" => "No autorizado");
+        }
+        if (!$compare) {
+            return array("result" => true, "sysmsg" => "no se realizan comparaciones");
+        }
+        if (!is_array($compare)) {
+            return array("result" => false, "sysmsg" => "comparación debe ser un array", "usrmsg" => "No autorizado");
+        }
+        if (is_array($data)) {
+            $result = false;
+            $mensaje = "no aceptado";
+            $usrmsg = "No autorizado";
+            foreach ($data as $valor) {
+                if (!isset($valor->$propertyKey)) {
+                    $result = false;
+                    $mensaje = "no existe la llave en propiedad";
+                    break;
+                }
+                if (in_array($valor->$propertyKey, $compare)) {
+                    $result = true;
+                    $mensaje = "aceptado";
+                    $usrmsg = "Autorizado";
+                    break;
+                }
+            }
+            return array("result" => $result, "sysmsg" => $mensaje, "usrmsg" => $usrmsg);
+        } else {
+            $result = false;
+            $mensaje = "no aceptado";
+            $usrmsg = "no autorizado";
+            if (in_array($data, $compare)) {
+                $result = true;
+                $mensaje = "aceptado";
+            }
+            return array("result" => $result, "sysmsg" => $mensaje, "usrmsg" => $usrmsg);
+        }
+    }
+
+    public function verificarExpiracion($token, $key) {
+        $data = $this->decodificar($token);
+        if (!isset($data->$key)) {
+            return array("result" => false, "sysmsg" => "Expiración no agregada", "usrmsg" => "Sesión inválida");
+        }
+        if (!is_numeric($data->$key)) {
+            return array("result" => false, "sysmsg" => "Expiración numérico", "usrmsg" => "Sesión inválida");
+        }
+        if ($data->$key + EXPIRACION_TOKEN * 60 * 60 > time()) {
+            return array("result" => true, "sysmsg" => "Token válido", "usrmsg" => "Sesión válida");
+        } else {
+            return array("result" => false, "sysmsg" => "Token expirado", "usrmsg" => "Sesión inválida");
+        }
+    }
+
+
+
 }
