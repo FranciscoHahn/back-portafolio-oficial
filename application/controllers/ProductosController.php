@@ -5,136 +5,105 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class ProductosController extends CI_Controller {
 
     public function __construct() {
-        header('Access-Control-Allow-Origin: *');
-        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-        $method = $_SERVER['REQUEST_METHOD'];
-        if ($method == "OPTIONS") {
-            die();
-        }
-
         parent::__construct();
         // Cargamos el modelo
         $this->load->model('UsuariosModel');
         $this->load->model('CategoriaProductoModel');
+        $this->load->model('ProductosModel');
     }
 
     // Método que permite al administrador agregar un usuario
-    public function agregarUsuario() {
-        // Obtenemos los datos del usuario a agregar
-        $nombres = $this->input->post('nombres');
-        $apellidos = $this->input->post('apellidos');
-        $rut = $this->input->post('rut');
-        $dvrut = $this->input->post('dvrut');
-        $logintoken = '';
-        $telefono = $this->input->post('telefono');
-        $password = $this->input->post('password');
-        $email = $this->input->post('email');
-        $username = $this->input->post('username');
+    public function obtenerProductos() {
+        // Obtener el token y el estatus de la solicitud
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->insertarUsuario($token, $nombres, $apellidos, $rut, $dvrut, $logintoken, $telefono, $password, $email, $username);
+        $estatus = $this->input->post('estado_producto');
 
+        // Llamar a la función obtenerProductos del modelo
+        $response = $this->ProductosModel->obtenerProductos($token, $estatus);
+
+        // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
 
-    public function modificarUsuario() {
-        // Obtener los datos del usuario a modificar
+    public function actualizarProducto() {
+        // Obtener los datos del producto a actualizar
         $id = $this->input->post('id');
-        $nombres = $this->input->post('nombres');
-        $apellidos = $this->input->post('apellidos');
-        $rut = $this->input->post('rut');
-        $dvrut = $this->input->post('dvrut');
-        $telefono = $this->input->post('telefono');
-        $password = $this->input->post('password');
-        $email = $this->input->post('email');
-        $username = $this->input->post('username');
+        $nombre = $this->input->post('nombre');
+        $marca = $this->input->post('marca');
+        $link_imagen = $this->input->post('link_imagen');
+        $id_categoria = $this->input->post('id_categoria');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->actualizarUsuario($token, $id, $nombres, $apellidos, $rut, $dvrut, $telefono, $password, $email, $username);
+
+        $response = $this->ProductosModel->actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
 
-    public function eliminarUsuario() {
-        // Obtenemos los datos del usuario a eliminar
-        $usuarioId = $this->input->post('id');
+    public function insertarProducto() {
+        // Obtener los datos del producto a insertar
+        $nombre = $this->input->post('nombre');
+        $marca = $this->input->post('marca');
+        $link_imagen = $this->input->post('link_imagen');
+        $id_categoria = $this->input->post('id_categoria');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->eliminarUsuario($usuarioId);
+
+        // Llamar a la función insertarProducto del modelo
+        $response = $this->ProductosModel->insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria);
+
+        // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
 
-    public function listarUsuarios() {
-        // Obtenemos el token de acceso
+    public function activarProducto() {
+        // Obtener el ID del producto a activar
+        $id = $this->input->post('id');
         $token = $this->input->post('token');
-        $result = $this->UsuariosModel->obtenerTodosUsuarios($token);
+
+        // Llamar a la función activarProducto del modelo
+        $response = $this->ProductosModel->activarProducto($token, $id);
+
+        // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
+        echo json_encode($response);
     }
 
-    public function asignarPerfilUsuario() {
+    public function desactivarProducto() {
+        // Obtener el ID del producto a desactivar
+        $id = $this->input->post('id');
         $token = $this->input->post('token');
-        $idperfil = $this->input->post('id_perfil');
-        $idusuario = $this->input->post('id_usuario');
-        $result = $this->UsuariosModel->asignarPerfilAUsuario($token, $idusuario, $idperfil);
+
+        // Llamar a la función desactivarProducto del modelo
+        $response = $this->ProductosModel->desactivarProducto($token, $id);
+
+        // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
+        echo json_encode($response);
     }
 
-    public function eliminarPerfilUsuario() {
+    public function obtenerProductosPorCategoria() {
+        // Obtener los parámetros de la solicitud
         $token = $this->input->post('token');
-        $idperfil = $this->input->post('id_perfil');
-        $idusuario = $this->input->post('id_usuario');
-        $result = $this->UsuariosModel->eliminarPerfilDeUsuario($token, $idusuario, $idperfil);
+        $id_categoria = $this->input->post('id_categoria');
+        $estatus = $this->input->post('estado_producto');
+
+        // Llamar al modelo para obtener los productos por categoría
+        $response = $this->ProductosModel->obtenerProductosPorCategoria($token, $id_categoria, $estatus);
+
+        // Devolver la respuesta como JSON
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
+        echo json_encode($response);
     }
 
-    public function getCategorias() {
+    public function obtenerProductoPorId() {
         $token = $this->input->post('token');
-        $result = $this->CategoriaProductoModel->getCategorias($token);
+        $id_producto = $this->input->post('id');
+
+        $response = $this->ProductosModel->obtenerProductoPorId($token, $id_producto);
+
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
-    }
-
-    public function insertarCategoria() {
-        $token = $this->input->post('token');
-        $nombre = $this->input->post('nombre_categoria');
-        $link = $this->input->post('link_imagen');
-        $result = $this->CategoriaProductoModel->insertarCategoria($token, $nombre, $link);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
-    }
-
-    //
-
-    public function modificarCategoria() {
-        $token = $this->input->post('token');
-        $id = $this->input->post('id_categoria');
-        $nombre = $this->input->post('nombre_categoria');
-        $link = $this->input->post('link_imagen');
-        $result = $this->CategoriaProductoModel->modificarCategoria($token, $id, $nombre, $link);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
-    }
-
-    public function getPerfilesUsuario() {
-        $token = $this->input->post('token');
-        $idUsuario = $this->input->post('id_usuario');
-        $result = $this->UsuariosModel->getTodosPerfilesUsuario($token, $idUsuario);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
-    }
-
-    public function perfilesActualUsuario() {
-        $token = $this->input->post('token');
-        $result = $this->UsuariosModel->getPerfilesUsuarioActual($token);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($result);
-    }
-
-    public function list_user() {
-        echo json_encode($this->db->query('select * from usuarios')->result_array());
+        echo json_encode($response);
     }
 
 }

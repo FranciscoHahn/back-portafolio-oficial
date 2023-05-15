@@ -2,7 +2,7 @@
 
 class Utilidades {
 
-    public function buildResponse($ok, $status, $httpstatus, $mensaje, $data) {
+    public function buildResponse($ok, $status, $httpstatus, $mensaje, $data = null) {
         $response = array(
             "ok" => $ok,
             "status" => $status,

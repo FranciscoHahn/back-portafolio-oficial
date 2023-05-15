@@ -80,5 +80,14 @@ $route['activar-cliente'] = "ClientesController/activarCliente";
 $route['desactivar-cliente'] = "ClientesController/desactivarCliente";
 $route['obtener-clientes'] = "ClientesController/obtenerClientes";
 
+$route['obtener-productos'] = "ProductosController/obtenerProductos";
+$route['obtener-productos-por-categoria'] = "ProductosController/obtenerProductosPorCategoria";
+$route['insertar-producto'] = "ProductosController/insertarProducto";
+$route['actualizar-producto'] = "ProductosController/actualizarProducto";
+$route['activar-producto'] = "ProductosController/activarProducto";
+$route['desactivar-producto'] = "ProductosController/desactivarProducto";
+//obtenerProductoPorId
+$route['obtener-producto-por-id'] = "ProductosController/obtenerProductoPorId";
+
 
 
