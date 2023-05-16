@@ -80,6 +80,8 @@ $route['actualizar-cliente'] = "ClientesController/actualizarCliente";
 $route['activar-cliente'] = "ClientesController/activarCliente";
 $route['desactivar-cliente'] = "ClientesController/desactivarCliente";
 $route['obtener-clientes'] = "ClientesController/obtenerClientes";
+//getDatosUsuario
+$route['datos-cliente'] = "ClientesController/getDatosCliente";
 
 $route['obtener-productos'] = "ProductosController/obtenerProductos";
 $route['obtener-productos-por-categoria'] = "ProductosController/obtenerProductosPorCategoria";

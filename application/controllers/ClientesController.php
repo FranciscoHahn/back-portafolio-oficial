@@ -85,10 +85,18 @@ class ClientesController extends CI_Controller {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
-    
-    public function obtenerClientes(){
+
+    public function obtenerClientes() {
         $token = $this->input->post('token');
-        $response = $this->ClientesModel->obtenerClientes($token);
+        $response = $this->ClientesModel->obtenerClientes($token, $this->input->post('estado_clientes'));
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function getDatosCliente() {
+        $token = $this->input->post('token');
+        $response = $this->ClientesModel->getDatosUsuario($token, $this->input->post('id'));
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
@@ -107,6 +115,5 @@ class ClientesController extends CI_Controller {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(time() - $this->ClientesModel->decode_token($token)->exp);
     }
-
 
 }

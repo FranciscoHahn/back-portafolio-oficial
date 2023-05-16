@@ -14,19 +14,23 @@ class ClientesModel extends CI_Model {
         $this->utilidades = new Utilidades();
     }
 
-    public function obtenerClientes($token) {
+    public function obtenerClientes($token, $activos = null) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
-
-        $verificarPropiedad = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPropiedad["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarPropiedad["usrmsg"], $verificarPropiedad);
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Perfil no autorizado');
         }
 
-        $query = $this->db->get_where('clientes', array('activo' => 1));
-        $clientes = $query->result_array();
+        $this->db->select('*')->from('clientes');
+        if ($activos == 'inactivos') {
+            $this->db->where('activo', 0);
+        }
+        if ($activos == 'activos') {
+            $this->db->where('activo', 1);
+        }
+        $clientes = $this->db->get()->result_array();
         $response = $this->utilidades->buildResponse(true, 'success', 200, 'Clientes obtenidos activos correctamente', $clientes);
         return $response;
     }
@@ -52,6 +56,7 @@ class ClientesModel extends CI_Model {
         }
 
         $token_data = array(
+            'userId' => $cliente->id,
             'id_cliente' => $cliente->id,
             'nombre' => $cliente->nombre,
             'apellido' => $cliente->apellido,
@@ -62,7 +67,8 @@ class ClientesModel extends CI_Model {
             ),
             'perfiles' => array(
                 array("id" => "99999", "nombre" => "Cliente")
-            )
+            ),
+            'profile' => 'Cliente'
         );
         $token = $this->jwt->generar($token_data);
         $this->db->set('token', $token);
@@ -137,11 +143,8 @@ class ClientesModel extends CI_Model {
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
-
-        $verificarAdmin = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        $verificarCliente = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Cliente'));
-        if (!$verificarAdmin["result"] && !$verificarCliente["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, 'No tiene los permisos necesarios', $verificarPropiedad);
+        if (!in_array($this->jwt->getProperty($token, 'profile'), array('Administrador', 'Cliente'))) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'No tiene los permisos necesarios');
         }
 
         if (empty($nombre) || empty($apellido) || empty($email) || empty($password) || empty($id)) {
@@ -150,7 +153,7 @@ class ClientesModel extends CI_Model {
         }
 
 
-        if ($verificarAdmin["result"]) {
+        if (in_array($this->jwt->getProperty($token, 'profile'), array('Administrador'))) {
             $query = $this->db->where(array('email' => $email, 'id !=' => $id))->get('clientes');
             if ($query->num_rows()) {
                 $mensaje = 'Existe otro cliente utilizando el email';
@@ -170,7 +173,7 @@ class ClientesModel extends CI_Model {
             $mensaje = 'Cliente actualizado correctamente';
             $response = $this->utilidades->buildResponse(true, 'success', 200, $mensaje, null);
             return $response;
-        } else if ($verificarCliente["result"]) {
+        } else if (in_array($this->jwt->getProperty($token, 'profile'), array('Cliente'))) {
             if ($decoded_token->id_cliente != $id) {
                 $mensaje = 'Identificador de cliente proporcionado no corresponde con su identificador';
                 $response = $this->utilidades->buildResponse(false, 'failed', 404, $mensaje, null);
@@ -203,9 +206,12 @@ class ClientesModel extends CI_Model {
 
     public function desactivarCliente($token, $id) {
         // Validar perfil de administrador
-        if (!$this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'))) {
-            $response = $this->utilidades->buildResponse(false, 'failed', 401, 'No tienes autorización para realizar esta acción', null);
-            return $response;
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Perfil no autorizado');
         }
 
         $data = array(
@@ -223,10 +229,8 @@ class ClientesModel extends CI_Model {
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
-        $verificarPerfil = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPerfil["result"]) {
-            $response = $this->utilidades->buildResponse(false, 'failed', 401, 'No tienes autorización para realizar esta acción', null);
-            return $response;
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Perfil no autorizado');
         }
 
         $data = array(
@@ -236,6 +240,38 @@ class ClientesModel extends CI_Model {
         $this->db->update('clientes', $data);
         $response = $this->utilidades->buildResponse(true, 'success', 200, 'Cliente activado correctamente', null);
         return $response;
+    }
+
+    public function getDatosUsuario($token, $id = null) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        $esAdmin = in_array($this->jwt->getProperty($token, 'profile'), array('Administrador'));
+        $esElMismoCliente = $this->jwt->getProperty($token, 'id_cliente') == $id ? true : false;
+        $this->db->select('*')->from('clientes');
+        if ($esAdmin) {
+            if ($id) {
+                $resultado = $this->db->where('id', $id)->get()->result_array();
+                return $this->utilidades->buildResponse(true, 'success', 200, 'datos de cliente', $resultado);
+            } else {
+                $resultado = $this->db->get()->result_array();
+                return $this->utilidades->buildResponse(true, 'success', 200, 'datos de todos los clientes, no se especifica un id de cliente.', $resultado);
+            }
+        }
+
+        if ($esElMismoCliente || (in_array($this->jwt->getProperty($token, 'profile'), array('Cliente')) && !$id)) {
+            if ($id) {
+                $resultado = $this->db->where('id', $id)->get()->result_array();
+                return $this->utilidades->buildResponse(true, 'success', 200, 'datos de cliente', $resultado);
+            } else {
+                $resultado = $this->db->where('id', $this->jwt->getProperty($token, 'id_cliente'))->get()->result_array();
+                return $this->utilidades->buildResponse(true, 'success', 200, 'datos de cliente actual', $resultado);
+            }
+        }
+        
+         return $this->utilidades->buildResponse(false, 'failed', 403, 'no puede acceder a los datos de otros clientes');
+
     }
 
 }
