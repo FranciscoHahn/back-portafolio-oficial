@@ -29,8 +29,9 @@ class UsuariosController extends CI_Controller {
         $password = $this->input->post('password');
         $email = $this->input->post('email');
         $username = $this->input->post('username');
+        $idPerfil = $this->input->post('id_perfil');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->insertarUsuario($token, $nombres, $apellidos, $rut, $dvrut, $telefono, $password, $email, $username);
+        $response = $this->UsuariosModel->insertarUsuario($token, $nombres, $apellidos, $rut, $telefono, $password, $email, $username, $idPerfil);
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
@@ -42,13 +43,13 @@ class UsuariosController extends CI_Controller {
         $nombres = $this->input->post('nombres');
         $apellidos = $this->input->post('apellidos');
         $rut = $this->input->post('rut');
-        $dvrut = $this->input->post('dvrut');
         $telefono = $this->input->post('telefono');
         $password = $this->input->post('password');
         $email = $this->input->post('email');
         $username = $this->input->post('username');
+        $idPerfil = $this->input->post('id_perfil');
         $token = $this->input->post('token');
-        $response = $this->UsuariosModel->actualizarUsuario($token, $id, $nombres, $apellidos, $rut, $dvrut, $telefono, $password, $email, $username);
+        $response = $this->UsuariosModel->actualizarUsuario($token, $id, $nombres, $apellidos, $rut, $telefono, $password, $email, $username, $idPerfil);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
@@ -73,7 +74,8 @@ class UsuariosController extends CI_Controller {
     public function listarUsuarios() {
         // Obtenemos el token de acceso
         $token = $this->input->post('token');
-        $result = $this->UsuariosModel->obtenerTodosUsuarios($token);
+        $activos = $this->input->post('estado_usuarios');
+        $result = $this->UsuariosModel->obtenerTodosUsuarios($token, $activos);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($result);
     }
@@ -124,6 +126,15 @@ class UsuariosController extends CI_Controller {
 
     public function gteusr() {
         echo json_encode($this->UsuariosModel->buscarPorId(3));
+    }
+
+    public function getDatosUsuario() {
+        
+        $token = $this->input->post('token');
+        $id = $this->input->post('id_usuario');
+        $result = $this->UsuariosModel->getDatosUsuario($token, $id);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result);
     }
 
 }

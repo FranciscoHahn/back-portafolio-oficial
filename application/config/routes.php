@@ -64,6 +64,7 @@ $route['listado-perfiles'] = "UsuariosController/getTodosPerfiles";
 $route['perfiles-usuario'] = "UsuariosController/getPerfilesUsuario";
 $route['perfiles-actual-usuario'] = "UsuariosController/perfilesActualUsuario";
 $route['restaurar-usuario'] = "UsuariosController/restaurarUsuario";
+$route['datos-usuario'] = "UsuariosController/getDatosUsuario";
 
 // todo lo relevante a productos
 $route['listar-categorias'] = "ProductosController/getCategorias";
