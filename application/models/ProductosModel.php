@@ -35,7 +35,7 @@ class ProductosModel extends CI_Model {
         }
     }
 
-    public function obtenerProductosPorCategoria($token, $id_categoria, $estatus) {
+    public function obtenerProductosPorCategoria($token, $id_categoria = null, $estatus = null) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -44,7 +44,10 @@ class ProductosModel extends CI_Model {
         $this->db->select('productos.*, categoria_producto.nombre AS nombre_categoria');
         $this->db->from($this->table);
         $this->db->join('categoria_producto', 'categoria_producto.id = productos.id_categoria');
-        $this->db->where('productos.id_categoria', $id_categoria);
+        if ($id_categoria) {
+            $this->db->where('productos.id_categoria', $id_categoria);
+        }
+
         if ($estatus == 'inactivos') {
             $this->db->where('productos.activo', 0);
         } elseif ($estatus == 'activos') {
@@ -65,11 +68,9 @@ class ProductosModel extends CI_Model {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $verificarPropiedad = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPropiedad["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarPropiedad["usrmsg"], $verificarPropiedad);
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Solo administradores pueden insertar productos');
         }
-
         $this->db->where('nombre', $nombre);
         $query = $this->db->get($this->table);
         if ($query->num_rows() > 0) {
@@ -94,14 +95,12 @@ class ProductosModel extends CI_Model {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $verificarPropiedad = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPropiedad["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarPropiedad["usrmsg"], $verificarPropiedad);
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Solo administradores pueden modificar productos');
         }
 
-        $this->db->where('nombre', $nombre);
-        $this->db->where('id !=', $id);
-        $query = $this->db->get($this->table);
+        $query = $this->db->where('nombre', $nombre)->where('id !=', $id)->get($this->table);
+        
         if ($query->num_rows() > 0) {
             return $this->utilidades->buildResponse(false, 'error', 400, 'Ya existe otro producto con el mismo nombre', array('productos' => $query->result_array()));
         } else {
@@ -111,16 +110,13 @@ class ProductosModel extends CI_Model {
                 'link_imagen' => $link_imagen,
                 'id_categoria' => $id_categoria
             );
-            $this->db->where('id', $id);
-            $this->db->update($this->table, $data);
-            if ($this->db->affected_rows() > 0) {
-                return $this->utilidades->buildResponse(true, 'success', 200, 'Producto actualizado');
+            if ($this->db->where('id', $id)->update($this->table, $data)) {
+                return $this->utilidades->buildResponse(true, 'success', 200, 'Producto actualizado', array("filas actualizadas" => "1"));
             } else {
                 return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontró el producto solicitado');
             }
         }
     }
-
 
     public function activarProducto($token, $id) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
@@ -128,18 +124,17 @@ class ProductosModel extends CI_Model {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $verificarPropiedad = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPropiedad["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarPropiedad["usrmsg"], $verificarPropiedad);
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Solo administradores pueden activar productos');
         }
 
         $data = array(
             'activo' => 1
         );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
-        if ($this->db->affected_rows() > 0) {
-            return $this->utilidades->buildResponse(true, 'success', 200, 'Producto activado');
+        
+        if ($this->db->update($this->table, $data)) {
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Producto activado', array("filas afectadas" => 1));
         } else {
             return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontró el producto solicitado');
         }
@@ -151,18 +146,16 @@ class ProductosModel extends CI_Model {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $verificarPropiedad = $this->jwt->verificarPropiedad($token, 'perfiles', 'nombre', array('Administrador'));
-        if (!$verificarPropiedad["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarPropiedad["usrmsg"], $verificarPropiedad);
+        if ($this->jwt->getProperty($token, 'profile') <> 'Administrador') {
+            return $this->utilidades->buildResponse(false, 'failed', 401, 'Solo administradores pueden desactivar productos');
         }
 
         $data = array(
             'activo' => 0
         );
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
-        if ($this->db->affected_rows() > 0) {
-            return $this->utilidades->buildResponse(true, 'success', 200, 'Producto desactivado');
+        if ($this->db->update($this->table, $data)) {
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Producto desactivado', array("filas afectadas" => 1));
         } else {
             return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontró el producto solicitado');
         }
@@ -187,4 +180,27 @@ class ProductosModel extends CI_Model {
         }
     }
 
+    public function getCategorias($token) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'listado de categorías de productos', $this->db->from('categoria_producto')->get()->result_array());
+    }
+
+    public function getMarcas($token) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'listado de marcas de productos', $this->db->from('marca_producto')->get()->result_array());
+    }
+    
+    private function updateProductos(){
+        
+    }
+
+    
 }

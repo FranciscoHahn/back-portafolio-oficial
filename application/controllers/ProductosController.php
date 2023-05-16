@@ -106,4 +106,20 @@ class ProductosController extends CI_Controller {
         echo json_encode($response);
     }
 
+    public function getCategorias() {
+        $token = $this->input->post('token');
+        $response = $this->ProductosModel->getCategorias($token);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    //getMarcas
+
+    public function getMarcas() {
+        $token = $this->input->post('token');
+        $response = $this->ProductosModel->getMarcas($token);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
 }

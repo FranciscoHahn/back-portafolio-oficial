@@ -92,5 +92,9 @@ $route['desactivar-producto'] = "ProductosController/desactivarProducto";
 //obtenerProductoPorId
 $route['obtener-producto-por-id'] = "ProductosController/obtenerProductoPorId";
 
+$route['listar-categorias'] = 'ProductosController/getCategorias';
+//getMarcas
+$route['listar-marcas'] = 'ProductosController/getMarcas';
+
 
 
