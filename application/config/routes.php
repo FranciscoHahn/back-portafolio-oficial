@@ -97,4 +97,20 @@ $route['listar-categorias'] = 'ProductosController/getCategorias';
 $route['listar-marcas'] = 'ProductosController/getMarcas';
 
 
+/// preparaciones
+$route['obtener-preparaciones'] = "PreparacionesController/obtenerPreparaciones";
+$route['insertar-preparacion'] = "PreparacionesController/insertarPreparacion";
+$route['actualizar-preparacion'] = "PreparacionesController/actualizarPreparacion";
+$route['activar-preparacion'] = "PreparacionesController/activarPreparacion";
+$route['desactivar-preparacion'] = "PreparacionesController/desactivarPreparacion";
+$route['obtener-preparaciones-con-relacion'] = 'PreparacionesController/obtenerPreparacionesConRelacion'; 
+$route['obtener-menu'] = 'PreparacionesController/getMenu'; 
+$route['set-producto-preparacion'] = 'PreparacionesController/relacionProductoPreparacion';
+$route['unset-producto-preparacion'] = 'PreparacionesController/unsetrelacionProductoPreparacion';
+$route['obtener-productos-preparacion'] = 'PreparacionesController/obtenerProductosPreparacion';
+//activarRelPreparacion
+$route['activar-producto-preparacion'] = 'PreparacionesController/activarRelPreparacion';
+$route['desactivar-producto-preparacion'] = 'PreparacionesController/desactivarRelPreparacion';
+
+
 

@@ -100,7 +100,7 @@ class ProductosModel extends CI_Model {
         }
 
         $query = $this->db->where('nombre', $nombre)->where('id !=', $id)->get($this->table);
-        
+
         if ($query->num_rows() > 0) {
             return $this->utilidades->buildResponse(false, 'error', 400, 'Ya existe otro producto con el mismo nombre', array('productos' => $query->result_array()));
         } else {
@@ -132,7 +132,7 @@ class ProductosModel extends CI_Model {
             'activo' => 1
         );
         $this->db->where('id', $id);
-        
+
         if ($this->db->update($this->table, $data)) {
             return $this->utilidades->buildResponse(true, 'success', 200, 'Producto activado', array("filas afectadas" => 1));
         } else {
@@ -197,10 +197,42 @@ class ProductosModel extends CI_Model {
 
         return $this->utilidades->buildResponse(true, 'success', 200, 'listado de marcas de productos', $this->db->from('marca_producto')->get()->result_array());
     }
-    
-    private function updateProductos(){
-        
+
+    public function actualizarStock($token, $id_producto, $nuevo_stock) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        $data = array(
+            'stock_bodega' => $nuevo_stock
+        );
+        $this->db->where('id', $id_producto);
+
+        if ($this->db->update($this->table, $data)) {
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Stock actualizado', array("filas afectadas" => 1));
+        } else {
+            return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontró el producto solicitado');
+        }
     }
 
-    
+    public function obtenerProductosDePreparacion($token, $idPreparacion) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $this->db->select('p.id AS id_producto, p.nombre AS nombre_producto');
+        $this->db->from('productos AS p');
+        $this->db->join('preparacion_producto AS pp', 'p.id = pp.id_producto');
+        $this->db->where('pp.id_preparacion', $idPreparacion);
+        $query = $this->db->get();
+        $productos = $query->result_array();
+
+        if (empty($productos)) {
+            return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontraron productos para la preparación especificada');
+        } else {
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Listado de productos de la preparación', array('productos' => $productos));
+        }
+    }
+
 }
