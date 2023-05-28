@@ -274,7 +274,7 @@ class PreparacionesModel extends CI_Model {
             preparaciones.*,
             COUNT(productos.id) AS total_productos,
             SUM(CASE WHEN productos.stock_critico <= productos.stock_bodega THEN 1 ELSE 0 END) AS productos_con_stock,
-            CASE WHEN SUM(CASE WHEN productos.stock_critico < productos.stock_bodega THEN 1 ELSE 0 END) = COUNT(productos.id) THEN 'disponible' ELSE 'no disponible' END AS disponibilidad
+            CASE WHEN SUM(CASE WHEN productos.stock_critico <= productos.stock_bodega THEN 1 ELSE 0 END) = COUNT(productos.id) THEN 'disponible' ELSE 'no disponible' END AS disponibilidad
         FROM preparaciones
         LEFT JOIN preparacion_producto ON preparacion_producto.id_preparacion = preparaciones.id
         LEFT JOIN productos ON productos.id = preparacion_producto.id_producto
