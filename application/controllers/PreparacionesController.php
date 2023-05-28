@@ -6,6 +6,10 @@ class PreparacionesController extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+        header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
+        header("Access-Control-Allow-Credentials: true");
         // Cargamos el modelo
         $this->load->model('UsuariosModel');
         $this->load->model('CategoriaProductoModel');
@@ -135,9 +139,9 @@ class PreparacionesController extends CI_Controller {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
-    
-    public function activarRelPreparacion(){
-                // Obtener el token
+
+    public function activarRelPreparacion() {
+        // Obtener el token
         $token = $this->input->post('token');
         $idPreparacion = $this->input->post('id');
         // Llamar a la función obtenerProductosConRelacion del controlador
@@ -147,9 +151,9 @@ class PreparacionesController extends CI_Controller {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
-    
-    public function desactivarRelPreparacion(){
-                // Obtener el token
+
+    public function desactivarRelPreparacion() {
+        // Obtener el token
         $token = $this->input->post('token');
         $idPreparacion = $this->input->post('id');
         // Llamar a la función obtenerProductosConRelacion del controlador
