@@ -62,7 +62,7 @@ class ProductosModel extends CI_Model {
         }
     }
 
-    public function insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria) {
+    public function insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -81,7 +81,9 @@ class ProductosModel extends CI_Model {
                 'marca' => $marca,
                 'link_imagen' => $link_imagen,
                 'activo' => 1,
-                'id_categoria' => $id_categoria
+                'id_categoria' => $id_categoria,
+                'stock_bodega' => $stockincial,
+                'stock_critico' => $stockcritico
             );
             $this->db->insert($this->table, $data);
             $insertId = $this->db->insert_id();
@@ -89,7 +91,7 @@ class ProductosModel extends CI_Model {
         }
     }
 
-    public function actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria) {
+    public function actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -108,7 +110,9 @@ class ProductosModel extends CI_Model {
                 'nombre' => $nombre,
                 'marca' => $marca,
                 'link_imagen' => $link_imagen,
-                'id_categoria' => $id_categoria
+                'id_categoria' => $id_categoria,
+                'stock_bodega' => $stockincial,
+                'stock_critico' => $stockcritico
             );
             if ($this->db->where('id', $id)->update($this->table, $data)) {
                 return $this->utilidades->buildResponse(true, 'success', 200, 'Producto actualizado', array("filas actualizadas" => "1"));
@@ -198,18 +202,19 @@ class ProductosModel extends CI_Model {
         return $this->utilidades->buildResponse(true, 'success', 200, 'listado de marcas de productos', $this->db->from('marca_producto')->get()->result_array());
     }
 
-    public function actualizarStock($token, $id_producto, $nuevo_stock) {
+    public function actualizarStock($token, $id_producto, $nuevo_stock, $stock_critico) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
         $data = array(
-            'stock_bodega' => $nuevo_stock
+            'stock_bodega' => $nuevo_stock,
+            'stock_critico' => $stock_critico
         );
         $this->db->where('id', $id_producto);
 
         if ($this->db->update($this->table, $data)) {
-            return $this->utilidades->buildResponse(true, 'success', 200, 'Stock actualizado', array("filas afectadas" => 1));
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Stocks actualizados', array("filas afectadas" => 1));
         } else {
             return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontró el producto solicitado');
         }

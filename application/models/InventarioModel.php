@@ -12,6 +12,20 @@ class InventarioModel extends CI_Model {
         $this->utilidades = new Utilidades();
     }
 
+    public function getCompraPorId($token, $id) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        // Obtener los registros de compra desde la base de datos
+        $this->db->where('id', $id);
+        $query = $this->db->get('registro_compras');
+        $registrosCompra = $query->result_array();
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Registro de compra id' . $id, array('registrosCompra' => $registrosCompra));
+    }
+
     public function listarRegistrosCompra($token) {
         // Verificar el token
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
@@ -149,11 +163,67 @@ class InventarioModel extends CI_Model {
         }
 
         // Eliminar el detalle de compra de la base de datos
-        $this->db->where('registro_compra_id', $compra_id);
-        $query = $this->db->get('detalles_compra');
-        $data = $query->result_array();
+        //$this->db->where('registro_compra_id', $compra_id);
+        $this->db->select('dc.id, dc.registro_compra_id, dc.cantidad, p.id as id_producto, p.nombre as nombre_producto');
+        $this->db->from('productos p');
+        $this->db->join('detalles_compra dc', 'dc.producto_id = p.id');
+        $this->db->where('dc.registro_compra_id', $compra_id);
 
-        return $this->utilidades->buildResponse(true, 'success', 200, 'Detalle compra id ' . $compra_id, array('data' => $data));
+        // Ejecutar la consulta y obtener los resultados
+        $query = $this->db->get();
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Detalle compra id ' . $compra_id, array('data' => $query->result_array()));
+    }
+
+    public function crear_salida_inventario($token, $producto_id, $cantidad, $id_usuario) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        // Verificar si el producto existe
+        $producto = $this->db->get_where('productos', ['id' => $producto_id])->row();
+        if (!$producto) {
+            return $this->utilidades->buildResponse(false, 'failed', 404, 'El producto no existe');
+        }
+
+        // Verificar si hay suficiente stock para la salida
+        if ($cantidad > $producto->stock_bodega) {
+            return $this->utilidades->buildResponse(false, 'failed', 400, 'No hay suficiente stock para realizar la salida');
+        }
+
+        // Crear el registro de salida de inventario
+        $data = [
+            'producto_id' => $producto_id,
+            'cantidad' => $cantidad,
+            'id_usuario' => $id_usuario,
+            'fecha_salida' => date('Y-m-d H:i:s')
+        ];
+        $this->db->insert('salidas_inventario', $data);
+        $insert_id = $this->db->insert_id();
+
+        // Verificar si el stock disponible es menor al stock crítico
+        if ($producto->stock_bodega <= $producto->stock_critico) {
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario creada exitosamente. Advertencia: Stock crítico alcanzado', array('insert_id' => $insert_id));
+        }
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario creada exitosamente', array('insert_id' => $insert_id));
+    }
+
+    public function eliminar_salida_inventario($token, $salida_id) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        // Verificar si la salida de inventario existe
+        $salida = $this->db->get_where('salidas_inventario', ['id' => $salida_id])->row();
+        if (!$salida) {
+            return $this->utilidades->buildResponse(false, 'failed', 404, 'La salida de inventario no existe');
+        }
+
+        // Eliminar la salida de inventario
+        $this->db->delete('salidas_inventario', ['id' => $salida_id]);
+
+        // Retornar la respuesta
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario eliminada exitosamente');
     }
 
 }
