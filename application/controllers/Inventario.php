@@ -95,7 +95,34 @@ class Inventario extends CI_Controller {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
+
+
+    public function inv_createsalida(){
+        $token = $this->input->post('token');
+        $producto_id = $this->input->post('producto_id');
+        $cantidad = $this->input->post('cantidad');
+        $idusuario = $this->jwt->getProperty($token, 'userId');
+        $response = $this->InventarioModel->crear_salida_inventario($token, $producto_id, $cantidad, $idusuario);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
     
+
+    public function inv_deletesalida(){
+        $token = $this->input->post('token');
+        $idsalida = $this->input->post('id_salida');
+        $response = $this->InventarioModel->eliminar_salida_inventario($token, $idsalida);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function inv_getallcompras(){
+        //listarRegistrosCompra
+        $token = $this->input->post('token');
+        $response = $this->InventarioModel->listarRegistrosCompra($token);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
     
     
 
