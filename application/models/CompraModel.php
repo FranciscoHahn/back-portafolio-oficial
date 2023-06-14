@@ -1,6 +1,6 @@
 <?php
 
-class UsuariosModel extends CI_Model {
+class CompraModel extends CI_Model {
 
     private $jwt;
     private $utilidades;
@@ -265,6 +265,75 @@ class UsuariosModel extends CI_Model {
         $reserva_id = $this->db->insert_id();
 
         return $this->utilidades->buildResponse(true, 'success', 200, 'Reserva creada correctamente', array('reserva_id' => $reserva_id));
+    }
+
+    public function crear_pedido($token, $atencion_id, $preparacion_id, $descripcion) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $data = array(
+            'atencion_id' => $atencion_id,
+            'preparacion_id' => $preparacion_id,
+            'descripcion' => $descripcion,
+            'estado' => 'en preparación'
+        );
+
+        $this->db->insert('pedidos', $data);
+        $pedido_id = $this->db->insert_id();
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Pedido creado correctamente', array('pedido_id' => $pedido_id));
+    }
+
+    public function eliminar_pedido($token, $pedido_id) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $this->db->where('id', $pedido_id);
+        $this->db->delete('pedidos');
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Pedido eliminado correctamente');
+    }
+
+    public function modificar_estado_pedido($token, $pedido_id, $estado) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $allowedStates = array('pendiente', 'en preparación', 'entregado', 'cancelado', 'disponible para entrega');
+        if (!in_array($estado, $allowedStates)) {
+            return $this->utilidades->buildResponse(false, 'failed', 400, 'Estado de pedido no válido');
+        }
+
+        $data = array(
+            'estado' => $estado
+        );
+
+        $this->db->where('id', $pedido_id);
+        $this->db->update('pedidos', $data);
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Estado del pedido modificado correctamente');
+    }
+
+    public function listar_pedidos_con_informacion($token, $estado_pedido) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $this->db->select('pedidos.*, mesas.numero AS numero_mesa, atencion_mesa.estado AS estado_atencion');
+        $this->db->from('pedidos');
+        $this->db->join('atencion_mesa', 'pedidos.atencion_id = atencion_mesa.id');
+        $this->db->join('mesas', 'atencion_mesa.mesa_id = mesas.id');
+        $this->db->where('pedidos.estado', $estado_pedido);
+        $query = $this->db->get();
+        $pedidos = $query->result_array();
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Listado de pedidos con información', array('pedidos' => $pedidos));
     }
 
 }
