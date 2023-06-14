@@ -88,3 +88,4 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 define("SECRET_KEY", "MySecretKey_Siglo21.Portafolio");
 define("ENCODE", "HS256");
 define("EXPIRACION_TOKEN", 24);//en horas
+define("TOLERANCIA_HRS_MESAS", 24);
