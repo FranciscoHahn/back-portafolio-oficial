@@ -269,9 +269,136 @@ class ClientesModel extends CI_Model {
                 return $this->utilidades->buildResponse(true, 'success', 200, 'datos de cliente actual', $resultado);
             }
         }
-        
-         return $this->utilidades->buildResponse(false, 'failed', 403, 'no puede acceder a los datos de otros clientes');
 
+        return $this->utilidades->buildResponse(false, 'failed', 403, 'no puede acceder a los datos de otros clientes');
+    }
+
+    public function google_auth($sub, $nombre, $apellido, $email, $telefono = '99999999', $password = 'default-google-auth') {
+        $query = $this->db->where('sub', $sub)->get('clientes');
+
+        $data = array(
+            'sub' => $sub,
+            'nombre' => $nombre,
+            'apellido' => $apellido,
+            'email' => $email,
+            'telefono' => $telefono,
+            'password' => $password,
+            'activo' => '1'
+        );
+
+        if ($query->num_rows()) {
+            $cliente = $query->row();
+            if (!$cliente->activo) {
+                $mensaje = 'Cuenta desactivada por administración';
+                $response = $this->utilidades->buildResponse(false, 'failed', 404, $mensaje, null);
+                return $response;
+            }
+            $token_data = array(
+                'userId' => $cliente->id,
+                'id_cliente' => $cliente->id,
+                'nombre' => $cliente->nombre,
+                'apellido' => $cliente->apellido,
+                'email' => $cliente->email,
+                'exp' => time() + (60 * 60 * 24), // Token válido por 24 horas,
+                'perfil' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'perfiles' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'profile' => 'Cliente'
+            );
+            $token = $this->jwt->generar($token_data);
+            $mensaje = 'Cliente autenticado correctamente';
+            $response = $this->utilidades->buildResponse(true, 'success', 200, $mensaje, array("data_cliente" => $token_data, "token" => $token));
+            return $response;
+        } else {
+            $insert = $this->db->insert('clientes', $data);
+            $cliente2 = $this->db->where('sub', $sub)->get('clientes')->row();
+            $token_data = array(
+                'userId' => $cliente2->id,
+                'id_cliente' => $cliente2->id,
+                'nombre' => $cliente2->nombre,
+                'apellido' => $cliente2->apellido,
+                'email' => $cliente2->email,
+                'exp' => time() + (60 * 60 * 24), // Token válido por 24 horas,
+                'perfil' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'perfiles' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'profile' => 'Cliente'
+            );
+            $token = $this->jwt->generar($token_data);
+            $mensaje = 'Cliente autenticado correctamente';
+            $response = $this->utilidades->buildResponse(true, 'success', 200, $mensaje, array("data_cliente" => $token_data, "token" => $token));
+            return $response;
+        }
+    }
+
+    function facebook_auth($sub, $nombre, $apellido, $email = "facebook-default@facebook", $telefono = '99999999', $password = 'default-facebook-auth') {
+        $query = $this->db->where('sub', $sub)->get('clientes');
+
+        $data = array(
+            'sub' => $sub,
+            'nombre' => $nombre,
+            'apellido' => $apellido,
+            'email' => $email,
+            'telefono' => $telefono,
+            'password' => $password,
+            'activo' => '1'
+        );
+
+        if ($query->num_rows()) {
+            $cliente = $query->row();
+            if (!$cliente->activo) {
+                $mensaje = 'Cuenta desactivada por administración';
+                $response = $this->utilidades->buildResponse(false, 'failed', 404, $mensaje, null);
+                return $response;
+            }
+            $token_data = array(
+                'userId' => $cliente->id,
+                'id_cliente' => $cliente->id,
+                'nombre' => $cliente->nombre,
+                'apellido' => $cliente->apellido,
+                'email' => $cliente->email,
+                'exp' => time() + (60 * 60 * 24), // Token válido por 24 horas,
+                'perfil' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'perfiles' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'profile' => 'Cliente'
+            );
+            $token = $this->jwt->generar($token_data);
+            $mensaje = 'Cliente autenticado correctamente';
+            $response = $this->utilidades->buildResponse(true, 'success', 200, $mensaje, array("data_cliente" => $token_data, "token" => $token));
+            return $response;
+        } else {
+            $insert = $this->db->insert('clientes', $data);
+            $cliente2 = $this->db->where('sub', $sub)->get('clientes')->row();
+            $token_data = array(
+                'userId' => $cliente2->id,
+                'id_cliente' => $cliente2->id,
+                'nombre' => $cliente2->nombre,
+                'apellido' => $cliente2->apellido,
+                'email' => $cliente2->email,
+                'exp' => time() + (60 * 60 * 24), // Token válido por 24 horas,
+                'perfil' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'perfiles' => array(
+                    array("id" => "99999", "nombre" => "Cliente")
+                ),
+                'profile' => 'Cliente'
+            );
+            $token = $this->jwt->generar($token_data);
+            $mensaje = 'Cliente autenticado correctamente';
+            $response = $this->utilidades->buildResponse(true, 'success', 200, $mensaje, array("data_cliente" => $token_data, "token" => $token));
+            return $response;
+        }
     }
 
 }
