@@ -40,9 +40,10 @@ class ProductosController extends CI_Controller {
         $stock_inicial = $this->input->post('stock_inicial');
         $stock_critico = $this->input->post('stock_critico');
         $unidadmedida = $this->input->post('unidad_medida');
+        $descripcion_unidad = $this->input->post('descripcion_unidad');
         $token = $this->input->post('token');
 
-        $response = $this->ProductosModel->actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidadmedida);
+        $response = $this->ProductosModel->actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidadmedida, $descripcion_unidad);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
@@ -56,10 +57,11 @@ class ProductosController extends CI_Controller {
         $stock_inicial = $this->input->post('stock_inicial');
         $stock_critico = $this->input->post('stock_critico');
         $unidad_medida = $this->input->post('unidad_medida');
+        $descripcion_unidad = $this->input->post('descripcion_unidad');
         $token = $this->input->post('token');
 
         // Llamar a la función insertarProducto del modelo
-        $response = $this->ProductosModel->insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidad_medida);
+        $response = $this->ProductosModel->insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidad_medida, $descripcion_unidad);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
