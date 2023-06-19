@@ -34,7 +34,7 @@ class PreparacionesModel extends CI_Model {
         }
     }
 
-    public function insertarPreparacion($token, $nombre, $descripcion, $precio, $categoria) {
+    public function insertarPreparacion($token, $nombre, $descripcion, $precio, $categoria, $linkimage) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -54,7 +54,8 @@ class PreparacionesModel extends CI_Model {
                 'descripcion' => $descripcion,
                 'precio' => $precio,
                 'activo' => 1,
-                'categoria' => $categoria
+                'categoria' => $categoria,
+                'link_image_auxiliar' => $linkimage
             );
             $this->db->insert('preparaciones', $data);
             $insertId = $this->db->insert_id();
@@ -82,7 +83,8 @@ class PreparacionesModel extends CI_Model {
                 'nombre' => $nombre,
                 'descripcion' => $descripcion,
                 'precio' => $precio,
-                'categoria' => $categoria
+                'categoria' => $categoria,
+                'link_image_auxiliar' => $linkimage
             );
             $this->db->where('id', $id);
             if ($this->db->update('preparaciones', $data)) {

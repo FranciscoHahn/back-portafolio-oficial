@@ -38,9 +38,10 @@ class PreparacionesController extends CI_Controller {
         $precio = $this->input->post('precio');
         $descripcion = $this->input->post('descripcion');
         $categoria = $this->input->post('categoria');
+        $imagen_auxiliar = $this->input->post('link_image_auxiliar');
 
         // Llamar a la función insertarPreparacion del modelo
-        $response = $this->PreparacionesModel->insertarPreparacion($token, $nombre, $descripcion, $precio, $categoria);
+        $response = $this->PreparacionesModel->insertarPreparacion($token, $nombre, $descripcion, $precio, $categoria, $imagen_auxiliar);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
@@ -55,9 +56,10 @@ class PreparacionesController extends CI_Controller {
         $precio = $this->input->post('precio');
         $categoria = $this->input->post('categoria');
         $descripcion = $this->input->post('descripcion');
+        $imagen_auxiliar = $this->input->post('link_image_auxiliar');
 
         // Llamar a la función actualizarPreparacion del modelo
-        $response = $this->PreparacionesModel->actualizarPreparacion($token, $id, $nombre, $precio, $descripcion, $categoria);
+        $response = $this->PreparacionesModel->actualizarPreparacion($token, $id, $nombre, $precio, $descripcion, $categoria, $imagen_auxiliar);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
