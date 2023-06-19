@@ -62,7 +62,7 @@ class ProductosModel extends CI_Model {
         }
     }
 
-    public function insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico, $unidad_almacenamiento, $descripcion_unidad) {
+    public function insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico, $unidad_medida) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -84,8 +84,7 @@ class ProductosModel extends CI_Model {
                 'id_categoria' => $id_categoria,
                 'stock_bodega' => $stockincial,
                 'stock_critico' => $stockcritico,
-                'unidad_almacenamiento' => $unidad_almacenamiento,
-                'descripcion_unidad' => $descripcion_unidad
+                'unidad_almacenamiento' => $unidad_medida
             );
             $this->db->insert($this->table, $data);
             $insertId = $this->db->insert_id();
@@ -93,7 +92,7 @@ class ProductosModel extends CI_Model {
         }
     }
 
-    public function actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico, $unidad_almacenamiento, $descripcion_unidad) {
+    public function actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stockincial, $stockcritico, $unidad_medida) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -115,8 +114,7 @@ class ProductosModel extends CI_Model {
                 'id_categoria' => $id_categoria,
                 'stock_bodega' => $stockincial,
                 'stock_critico' => $stockcritico,
-                'unidad_almacenamiento' => $unidad_almacenamiento,
-                'descripcion_unidad' => $descripcion_unidad
+                'unidad_almacenamiento' => $unidad_medida
             );
             if ($this->db->where('id', $id)->update($this->table, $data)) {
                 return $this->utilidades->buildResponse(true, 'success', 200, 'Producto actualizado', array("filas actualizadas" => "1"));

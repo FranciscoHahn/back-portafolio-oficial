@@ -39,11 +39,10 @@ class ProductosController extends CI_Controller {
         $id_categoria = $this->input->post('id_categoria');
         $stock_inicial = $this->input->post('stock_inicial');
         $stock_critico = $this->input->post('stock_critico');
+        $unidadmedida = $this->input->post('unidad_medida');
         $token = $this->input->post('token');
-        $unidad_almacenamiento = $this->input->post('unidad_almacenamiento');
-        $descripcion_unidad = $this->input->post('desc_unidad_almacenamiento');
 
-        $response = $this->ProductosModel->actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidad_almacenamiento, $descripcion_unidad);
+        $response = $this->ProductosModel->actualizarProducto($token, $id, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidadmedida);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
@@ -56,12 +55,11 @@ class ProductosController extends CI_Controller {
         $id_categoria = $this->input->post('id_categoria');
         $stock_inicial = $this->input->post('stock_inicial');
         $stock_critico = $this->input->post('stock_critico');
+        $unidad_medida = $this->input->post('unidad_medida');
         $token = $this->input->post('token');
-        $unidad_almacenamiento = $this->input->post('unidad_almacenamiento');
-        $descripcion_unidad = $this->input->post('desc_unidad_almacenamiento');
 
         // Llamar a la función insertarProducto del modelo
-        $response = $this->ProductosModel->insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidad_almacenamiento, $descripcion_unidad);
+        $response = $this->ProductosModel->insertarProducto($token, $nombre, $marca, $link_imagen, $id_categoria, $stock_inicial, $stock_critico, $unidad_medida);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
