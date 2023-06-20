@@ -48,13 +48,14 @@ class InventarioModel extends CI_Model {
         }
 
         // Crear el nuevo registro de compra en la base de datos
+        $fecha_compra_timestamp = strtotime($fecha_compra);
         $data = array(
             'fecha_registro' => date('Y-m-d H:i:s'),
             'proveedor' => $proveedor,
             'id_usuario' => $id_usuario,
             'nro_doc_compra' => $nro_doc_compra,
             'total_compra' => $total_compra,
-            'fecha_compra' => $fecha_compra
+            'fecha_compra' => date('Y-m-d H:i:s', $fecha_compra_timestamp)
         );
         $this->db->insert('registro_compras', $data);
         $registro_compra_id = $this->db->insert_id();
@@ -164,7 +165,7 @@ class InventarioModel extends CI_Model {
 
         // Eliminar el detalle de compra de la base de datos
         //$this->db->where('registro_compra_id', $compra_id);
-        $this->db->select('dc.id, dc.registro_compra_id, dc.cantidad, p.id as id_producto, p.nombre as nombre_producto');
+        $this->db->select('dc.id, dc.registro_compra_id, dc.precio_unitario ,dc.cantidad, p.id as id_producto, p.nombre as nombre_producto');
         $this->db->from('productos p');
         $this->db->join('detalles_compra dc', 'dc.producto_id = p.id');
         $this->db->where('dc.registro_compra_id', $compra_id);
