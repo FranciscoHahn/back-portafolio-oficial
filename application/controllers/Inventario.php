@@ -111,4 +111,24 @@ class Inventario extends CI_Controller {
         echo json_encode($response);
     }
 
+    public function inv_createsalida() {
+        //crear_salida_inventario
+        $token = $this->input->post('token');
+        $cantidad = $this->input->post('cantidad');
+        $id_producto = $this->input->post('producto_id');
+        $id_usuario = $this->jwt->getProperty($token, 'userId');
+        $response = $this->InventarioModel->crear_salida_inventario($token, $id_producto, $cantidad, $id_usuario);
+        echo json_encode($response);
+    }
+
+    //eliminar_salida_inventario
+
+    public function inv_deletesalida() {
+        //crear_salida_inventario
+        $token = $this->input->post('token');
+        $id_salida = $this->input->post('id_salida');
+        $response = $this->InventarioModel->eliminar_salida_inventario($token, $id_salida);
+        echo json_encode($response);
+    }
+
 }

@@ -187,7 +187,7 @@ class InventarioModel extends CI_Model {
         }
 
         // Verificar si hay suficiente stock para la salida
-        if ($cantidad > $producto->stock_bodega) {
+        if ($cantidad >= $producto->stock_bodega) {
             return $this->utilidades->buildResponse(false, 'failed', 400, 'No hay suficiente stock para realizar la salida');
         }
 
@@ -202,7 +202,7 @@ class InventarioModel extends CI_Model {
         $insert_id = $this->db->insert_id();
 
         // Verificar si el stock disponible es menor al stock crítico
-        if ($producto->stock_bodega <= $producto->stock_critico) {
+        if (($producto->stock_bodega - $cantidad ) <= $producto->stock_critico) {
             return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario creada exitosamente. Advertencia: Stock crítico alcanzado', array('insert_id' => $insert_id));
         }
 
@@ -234,12 +234,12 @@ class InventarioModel extends CI_Model {
         }
         
         $data = $this->db
-                ->select('p.nombre, u.nombres, u.apellidos, si.*')
+                ->select('p.nombre nombre_producto, u.nombres nombres_usuario, u.apellidos apellidos_usuario, si.*')
                 ->from('productos p')
                 ->join('salidas_inventario si', 'on si.producto_id = p.id')
                 ->join('usuarios u', 'on si.id_usuario = u.id')
                 ->get()->result_array();
-        return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario eliminada exitosamente', array("salidas" => $data));
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Salidas de inventario', array("salidas" => $data));
     }
 
 }
