@@ -135,8 +135,9 @@ class PreparacionesController extends CI_Controller {
         // Obtener el token
         $token = $this->input->post('token');
         $idPreparacion = $this->input->post('id_preparacion');
+        $activos = $this->input->post('activos');
         // Llamar a la función obtenerProductosConRelacion del controlador
-        $response = $this->PreparacionesModel->obtenerProductosDePreparacion($token, $idPreparacion);
+        $response = $this->PreparacionesModel->obtenerProductosDePreparacion($token, $idPreparacion, $activos);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');

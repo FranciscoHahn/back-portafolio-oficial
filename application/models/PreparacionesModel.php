@@ -67,7 +67,7 @@ class PreparacionesModel extends CI_Model {
         }
     }
 
-    public function actualizarPreparacion($token, $id, $nombre, $precio, $descripcion, $categoria) {
+    public function actualizarPreparacion($token, $id, $nombre, $precio, $descripcion, $categoria, $linkimage) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -153,8 +153,9 @@ class PreparacionesModel extends CI_Model {
         // Verificar si la relación ya existe en la base de datos
         $query = $this->db->where('id_producto', $idProducto)->where(array('id_preparacion' => $idPreparacion, 'activo' => 1))->get('preparacion_producto');
         if ($query->num_rows() > 0) {
-
-            return $this->utilidades->buildResponse(true, 'success', 200, 'Relación producto-preparación ya existe', null);
+            $this->db->where('id_producto', $idProducto)->where('id_preparacion', $idPreparacion);
+            $this->db->update('preparacion_producto', array('activo' => 1));
+            return $this->utilidades->buildResponse(true, 'success', 200, 'Relación producto-preparación ya existe, fue activada', null);
         } else {
             // Crear una nueva relación
             $data = array(
@@ -290,21 +291,24 @@ class PreparacionesModel extends CI_Model {
         return $this->utilidades->buildResponse(true, 'success', 200, 'Menu completo', $data);
     }
 
-    public function obtenerProductosDePreparacion($token, $idPreparacion) {
+    public function obtenerProductosDePreparacion($token, $idPreparacion, $activos=null) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $this->db->select('p.*');
+        $this->db->select('p.*, pp.id as id_preparacion_prod');
         $this->db->from('productos AS p');
         $this->db->join('preparacion_producto AS pp', 'p.id = pp.id_producto');
         $this->db->where('pp.id_preparacion', $idPreparacion);
+        if($activos){
+            $this->db->where('pp.activo', 1);
+        }
         $query = $this->db->get();
         $productos = $query->result_array();
 
         if (empty($productos)) {
-            return $this->utilidades->buildResponse(false, 'error', 404, 'No se encontraron productos para la preparación especificada');
+            return $this->utilidades->buildResponse(true, 'success', 200, 'No se encontraron productos para la preparación especificada', array('productos' => []));
         } else {
             return $this->utilidades->buildResponse(true, 'success', 200, 'Listado de productos de la preparación', array('productos' => $productos));
         }
