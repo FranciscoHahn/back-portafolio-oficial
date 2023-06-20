@@ -13,7 +13,7 @@ class PreparacionesModel extends CI_Model {
         $this->table = 'productos';
     }
 
-    public function obtenerPreparaciones($token, $estatus) {
+    public function obtenerPreparaciones($token, $estatus = null, $id = null) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -24,6 +24,10 @@ class PreparacionesModel extends CI_Model {
             $this->db->where('activo', 0);
         } elseif ($estatus == 'activos') {
             $this->db->where('activo', 1);
+        }
+
+        if ($id) {
+            $this->db->where('id', $id);
         }
         $query = $this->db->get();
         $preparaciones = $query->result_array();

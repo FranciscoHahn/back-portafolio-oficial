@@ -22,9 +22,10 @@ class PreparacionesController extends CI_Controller {
         // Obtener el token y el estado de la preparación
         $token = $this->input->post('token');
         $estadoPreparacion = $this->input->post('estado_preparacion');
+        $id = $this->input->post('id');
 
         // Llamar a la función obtenerPreparaciones del modelo
-        $response = $this->PreparacionesModel->obtenerPreparaciones($token, $estadoPreparacion);
+        $response = $this->PreparacionesModel->obtenerPreparaciones($token, $estadoPreparacion, $id);
 
         // Devolver la respuesta en formato JSON
         header('Content-Type: application/json; charset=utf-8');
