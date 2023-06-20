@@ -227,4 +227,19 @@ class InventarioModel extends CI_Model {
         return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario eliminada exitosamente');
     }
 
+    public function get_salidas_inventario($token) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+        
+        $data = $this->db
+                ->select('p.nombre, u.nombres, u.apellidos, si.*')
+                ->from('productos p')
+                ->join('salidas_inventario si', 'on si.producto_id = p.id')
+                ->join('usuarios u', 'on si.id_usuario = u.id')
+                ->get()->result_array();
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Salida de inventario eliminada exitosamente', array("salidas" => $data));
+    }
+
 }
