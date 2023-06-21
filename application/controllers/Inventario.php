@@ -118,6 +118,7 @@ class Inventario extends CI_Controller {
         $id_producto = $this->input->post('producto_id');
         $id_usuario = $this->jwt->getProperty($token, 'userId');
         $response = $this->InventarioModel->crear_salida_inventario($token, $id_producto, $cantidad, $id_usuario);
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
 
@@ -128,6 +129,7 @@ class Inventario extends CI_Controller {
         $token = $this->input->post('token');
         $id_salida = $this->input->post('id_salida');
         $response = $this->InventarioModel->eliminar_salida_inventario($token, $id_salida);
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
 
