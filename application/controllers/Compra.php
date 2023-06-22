@@ -52,7 +52,7 @@ class Compra extends CI_Controller {
         $mesa_id = $this->input->post('mesa_id');
         $mesero_id = $this->input->post('mesero_id');
 
-        $response = $this->CompraModel->crear_atencion_mesa_mesero($token, $mesa_id, $mesero_id);
+        $response = $this->CompraModel->crear_atencion_mesa_mesero($token, $mesa_id, $this->jwt->getProperty($token, 'userId'));
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }
@@ -142,6 +142,14 @@ class Compra extends CI_Controller {
         $estado_pedido = $this->input->post('estado_pedido');
 
         $response = $this->CompraModel->listar_pedidos_con_informacion($token, $estado_pedido);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function ultimo_pedido_mesa() {
+        $token = $this->input->post('token');
+        $id_mesa = $this->input->post('id_mesa');
+        $response = $this->CompraModel->get_ultima_atencion_mesa($token, $id_mesa);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }

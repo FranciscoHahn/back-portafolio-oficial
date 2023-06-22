@@ -336,4 +336,34 @@ class CompraModel extends CI_Model {
         return $this->utilidades->buildResponse(true, 'success', 200, 'Listado de pedidos con información', array('pedidos' => $pedidos));
     }
 
+    public function get_atenciones_mesa($token, $idmesa) {
+        
+    }
+
+    public function get_ultima_atencion_mesa($token, $idmesa) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+        $atencion = $this->db->select('am.*, me.numero')
+                ->from('atencion_mesa am')
+                ->join('mesas me', 'am.mesa_id = me.id')
+                ->where('me.estado', 'ocupada')
+                ->where('me.id', $idmesa)
+                ->order_by('am.id', 'desc')
+                ->get()
+                ->row();
+        
+        $pedidos = $this->db
+                ->select('*')
+                ->from('pedidos p')
+                ->join('preparaciones prep', 'prep.id = p.preparacion_id')
+                ->where('p.atencion_id', $atencion->id)
+                ->get()
+                ->result();
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Atencion actual', array('atencion_actual' => $atencion, 'pedidos' => $pedidos));
+    }
+
 }
