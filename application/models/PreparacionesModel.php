@@ -286,7 +286,8 @@ class PreparacionesModel extends CI_Model {
         LEFT JOIN preparacion_producto ON preparacion_producto.id_preparacion = preparaciones.id
         LEFT JOIN productos ON productos.id = preparacion_producto.id_producto
         where preparacion_producto.activo = 1
-        GROUP BY preparaciones.id", false);
+        and preparaciones.activo = 1
+        GROUP BY preparaciones.id order by preparaciones.categoria", false);
         $data = $query->result_array();
         return $this->utilidades->buildResponse(true, 'success', 200, 'Menu completo', $data);
     }
