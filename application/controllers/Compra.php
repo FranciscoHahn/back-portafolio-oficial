@@ -112,8 +112,9 @@ class Compra extends CI_Controller {
         $atencion_id = $this->input->post('atencion_id');
         $preparacion_id = $this->input->post('preparacion_id');
         $descripcion = $this->input->post('descripcion');
+        $cantidad = $this->input->post('cantidad');
 
-        $response = $this->CompraModel->crear_pedido($token, $atencion_id, $preparacion_id, $descripcion);
+        $response = $this->CompraModel->crear_pedido($token, $atencion_id, $preparacion_id, $descripcion, $cantidad);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($response);
     }

@@ -267,7 +267,7 @@ class CompraModel extends CI_Model {
         return $this->utilidades->buildResponse(true, 'success', 200, 'Reserva creada correctamente', array('reserva_id' => $reserva_id));
     }
 
-    public function crear_pedido($token, $atencion_id, $preparacion_id, $descripcion) {
+    public function crear_pedido($token, $atencion_id, $preparacion_id, $descripcion, $cantidad) {
         $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
         if (!$verificarExpiracion["result"]) {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
@@ -277,7 +277,8 @@ class CompraModel extends CI_Model {
             'atencion_id' => $atencion_id,
             'preparacion_id' => $preparacion_id,
             'descripcion' => $descripcion,
-            'estado' => 'en preparación'
+            'estado' => 'en preparación',
+            'cantidad' => $cantidad
         );
 
         $this->db->insert('pedidos', $data);
@@ -330,6 +331,7 @@ class CompraModel extends CI_Model {
         $this->db->join('atencion_mesa', 'pedidos.atencion_id = atencion_mesa.id');
         $this->db->join('mesas', 'atencion_mesa.mesa_id = mesas.id');
         $this->db->where('pedidos.estado', $estado_pedido);
+        $this->db->order_by('pedidos.fecha_hora_pedido', 'ASC');
         $query = $this->db->get();
         $pedidos = $query->result_array();
 
@@ -356,10 +358,11 @@ class CompraModel extends CI_Model {
                 ->row();
         
         $pedidos = $this->db
-                ->select('*')
+                ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido')
                 ->from('pedidos p')
                 ->join('preparaciones prep', 'prep.id = p.preparacion_id')
                 ->where('p.atencion_id', $atencion->id)
+                ->order_by('p.fecha_hora_pedido', 'ASC')
                 ->get()
                 ->result();
 
