@@ -105,10 +105,6 @@ class CompraModel extends CI_Model {
     }
 
     public function crear_atencion_mesa_cliente($token, $mesa_id, $cliente_id) {
-        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
-        if (!$verificarExpiracion["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
-        }
 
         // Obtener la fecha y hora actual
         $fechaActual = date('Y-m-d H:i:s');
@@ -268,10 +264,6 @@ class CompraModel extends CI_Model {
     }
 
     public function crear_pedido($token, $atencion_id, $preparacion_id, $descripcion, $cantidad) {
-        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
-        if (!$verificarExpiracion["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
-        }
 
         $data = array(
             'atencion_id' => $atencion_id,
@@ -343,10 +335,6 @@ class CompraModel extends CI_Model {
     }
 
     public function get_ultima_atencion_mesa($token, $idmesa) {
-        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
-        if (!$verificarExpiracion["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
-        }
 
         $atencion = $this->db->select('am.*, me.numero')
                 ->from('atencion_mesa am')

@@ -270,10 +270,6 @@ class PreparacionesModel extends CI_Model {
     }
 
     public function obtenerMenu($token) {
-        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
-        if (!$verificarExpiracion["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
-        }
 
 
         $query = $this->db->query("
