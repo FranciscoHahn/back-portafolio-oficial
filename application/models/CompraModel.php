@@ -12,10 +12,6 @@ class CompraModel extends CI_Model {
     }
 
     public function get_mesas($token) {
-        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
-        if (!$verificarExpiracion["result"]) {
-            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
-        }
 
         // Obtener los registros de compra desde la base de datos
         $query = $this->db->get('mesas');
@@ -107,6 +103,9 @@ class CompraModel extends CI_Model {
     public function crear_atencion_mesa_cliente($token, $mesa_id, $cliente_id) {
 
         // Obtener la fecha y hora actual
+        
+        
+        
         $fechaActual = date('Y-m-d H:i:s');
 
         // Crear el array de datos para la inserción
@@ -322,7 +321,9 @@ class CompraModel extends CI_Model {
         $this->db->from('pedidos');
         $this->db->join('atencion_mesa', 'pedidos.atencion_id = atencion_mesa.id');
         $this->db->join('mesas', 'atencion_mesa.mesa_id = mesas.id');
-        $this->db->where('pedidos.estado', $estado_pedido);
+        if ($estado_pedido) {
+            $this->db->where('pedidos.estado', $estado_pedido);
+        }
         $this->db->order_by('pedidos.fecha_hora_pedido', 'ASC');
         $query = $this->db->get();
         $pedidos = $query->result_array();
@@ -344,7 +345,7 @@ class CompraModel extends CI_Model {
                 ->order_by('am.id', 'desc')
                 ->get()
                 ->row();
-        
+
         $pedidos = $this->db
                 ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido')
                 ->from('pedidos p')
