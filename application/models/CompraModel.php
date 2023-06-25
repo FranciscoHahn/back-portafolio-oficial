@@ -317,10 +317,11 @@ class CompraModel extends CI_Model {
             return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
         }
 
-        $this->db->select('pedidos.*, mesas.numero AS numero_mesa, atencion_mesa.estado AS estado_atencion');
+        $this->db->select('pedidos.*, mesas.numero AS numero_mesa, atencion_mesa.estado AS estado_atencion, atencion_mesa.fecha_atencion as fecha_hora_inicio_atencion, preparaciones.nombre as nombre_preparacion, preparaciones.categoria as categoria_preparacion, preparaciones.descripcion as preparacion_descripcion');
         $this->db->from('pedidos');
         $this->db->join('atencion_mesa', 'pedidos.atencion_id = atencion_mesa.id');
         $this->db->join('mesas', 'atencion_mesa.mesa_id = mesas.id');
+        $this->db->join('preparaciones', 'on preparaciones.id = pedidos.preparacion_id');
         if ($estado_pedido) {
             $this->db->where('pedidos.estado', $estado_pedido);
         }
@@ -347,7 +348,7 @@ class CompraModel extends CI_Model {
                 ->row();
 
         $pedidos = $this->db
-                ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido')
+                ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido, p.precio as precio_pedido')
                 ->from('pedidos p')
                 ->join('preparaciones prep', 'prep.id = p.preparacion_id')
                 ->where('p.atencion_id', $atencion->id)
