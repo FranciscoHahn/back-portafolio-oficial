@@ -1,4 +1,14 @@
 RewriteEngine on
+
+# Permitir acceso desde cualquier origen
+Header set Access-Control-Allow-Origin "*"
+
+# Permitir los métodos HTTP permitidos
+Header set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+
+# Permitir los encabezados especificados
+Header set Access-Control-Allow-Headers "Content-Type"
+
 RewriteCond $1 !^(index\.php|resources|robots\.txt)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

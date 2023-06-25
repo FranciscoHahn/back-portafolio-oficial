@@ -5,6 +5,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Integracion extends CI_Controller {
 
     function __construct() {
+        header('Access-Control-Allow-Origin: *'); // Permitir acceso desde cualquier origen
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS'); // Permitir los métodos HTTP permitidos
+        header('Access-Control-Allow-Headers: Content-Type'); // Permitir los encabezados especificados
         parent::__construct();
         $this->load->Model('ClientesModel');
     }
@@ -25,6 +28,10 @@ class Integracion extends CI_Controller {
      * @see https://codeigniter.com/userguide3/general/urls.html
      */
     public function google_auth() {
+        header('Access-Control-Allow-Origin: *'); // Permitir acceso desde cualquier origen
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS'); // Permitir los métodos HTTP permitidos
+        header('Access-Control-Allow-Headers: Content-Type'); // Permitir los encabezados especificados
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Leer el contenido de la solicitud en formato JSON
             $json = file_get_contents('php://input');
@@ -43,6 +50,10 @@ class Integracion extends CI_Controller {
     }
 
     public function facebook_auth() {
+        header('Access-Control-Allow-Origin: *'); // Permitir acceso desde cualquier origen
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS'); // Permitir los métodos HTTP permitidos
+        header('Access-Control-Allow-Headers: Content-Type'); // Permitir los encabezados especificados
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Leer el contenido de la solicitud en formato JSON
             $json = file_get_contents('php://input');
