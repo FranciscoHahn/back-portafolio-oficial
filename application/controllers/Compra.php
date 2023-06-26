@@ -155,4 +155,43 @@ class Compra extends CI_Controller {
         echo json_encode($response);
     }
 
+    //todas_atenciones_con_info
+
+    public function todas_atenciones_con_info() {
+        $token = $this->input->post('token');
+        $response = $this->CompraModel->todas_atenciones_con_info($token);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function get_datos_atencion() {
+        $token = $this->input->post('token');
+        $id_atencion = $this->input->post('id_atencion');
+        $response = $this->CompraModel->get_datos_atencion($token, $id_atencion);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function pagar_atencion() {
+
+        $token = $this->input->post('token');
+        $atencion_id = $this->input->post('atencion_id');
+        $total_cuenta = $this->input->post('total_cuenta');
+        $total_cancelado = $this->input->post('total_cancelado');
+        $forma_pago = $this->input->post('forma_pago');
+
+
+        $response = $this->CompraModel->pagar_atencion($token, $atencion_id, $total_cuenta, $total_cancelado, $forma_pago);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
+    public function finalizar_atencion() {
+
+        //finalizar_atencion
+        $response = $this->CompraModel->finalizar_atencion($this->input->post('token'), $this->input->post('atencion_id'));
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($response);
+    }
+
 }

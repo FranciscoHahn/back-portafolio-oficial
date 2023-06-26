@@ -103,9 +103,9 @@ class CompraModel extends CI_Model {
     public function crear_atencion_mesa_cliente($token, $mesa_id, $cliente_id) {
 
         // Obtener la fecha y hora actual
-        
-        
-        
+
+
+
         $fechaActual = date('Y-m-d H:i:s');
 
         // Crear el array de datos para la inserción
@@ -357,6 +357,107 @@ class CompraModel extends CI_Model {
                 ->result();
 
         return $this->utilidades->buildResponse(true, 'success', 200, 'Atencion actual', array('atencion_actual' => $atencion, 'pedidos' => $pedidos));
+    }
+
+    public function todas_atenciones_con_info($token) {
+
+        $atenciones = $this->db->select('am.*, me.numero')
+                ->from('atencion_mesa am')
+                ->join('mesas me', 'am.mesa_id = me.id')
+                ->where('me.estado', 'ocupada')
+                ->order_by('am.id', 'desc')
+                ->get()
+                ->result();
+
+        foreach ($atenciones as $atencion) {
+            $atencion->pedidos = $this->db
+                    ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido, p.precio as precio_pedido')
+                    ->from('pedidos p')
+                    ->join('preparaciones prep', 'prep.id = p.preparacion_id')
+                    ->where('p.atencion_id', $atencion->id)
+                    ->get()
+                    ->result();
+        }
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Atencion actual', array('atenciones' => $atenciones));
+    }
+
+    public function get_datos_atencion($token, $id_atencion) {
+        $atencion = $this->db->select('am.*, me.numero')
+                ->from('atencion_mesa am')
+                ->join('mesas me', 'am.mesa_id = me.id')
+                ->where('me.estado', 'ocupada')
+                ->where('am.id', $id_atencion)
+                ->order_by('am.id', 'desc')
+                ->get()
+                ->row();
+
+        $pedidos = $this->db
+                ->select('prep.*, p.id id_pedido, p.descripcion desc_pedido, p.cantidad, p.estado, p.fecha_hora_pedido, p.precio as precio_pedido')
+                ->from('pedidos p')
+                ->join('preparaciones prep', 'prep.id = p.preparacion_id')
+                ->where('p.atencion_id', $atencion->id)
+                ->order_by('p.fecha_hora_pedido', 'ASC')
+                ->get()
+                ->result();
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Datos atención', array('atencion_actual' => $atencion, 'pedidos' => $pedidos));
+    }
+
+    public function pagar_atencion($token, $atencion_id, $total_cuenta, $total_cancelado, $forma_pago) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+
+        // Verificar si la atención existe
+        $this->db->where('id', $atencion_id);
+        $query = $this->db->get('atencion_mesa');
+        $atencion = $query->row();
+
+        if (!$atencion) {
+            return $this->utilidades->buildResponse(false, 'failed', 400, 'La atención a mesa no existe');
+        }
+
+        // Actualizar el estado de la atención
+        $this->db->set('total_cuenta', $total_cuenta);
+        $this->db->set('total_cancelado', $total_cancelado);
+        $this->db->set('forma_pago', $forma_pago);
+        $this->db->set('estado', 'pagado');
+
+        $this->db->where('id', $atencion_id);
+        $this->db->update('atencion_mesa');
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Estado de atención actualizado correctamente');
+    }
+
+    public function finalizar_atencion($token, $atencion_id) {
+        $verificarExpiracion = $this->jwt->verificarExpiracion($token, 'exp');
+        if (!$verificarExpiracion["result"]) {
+            return $this->utilidades->buildResponse(false, 'failed', 401, $verificarExpiracion["usrmsg"], $verificarExpiracion);
+        }
+
+
+        // Verificar si la atención existe
+        $this->db->where('id', $atencion_id);
+        $query = $this->db->get('atencion_mesa');
+        $atencion = $query->row();
+
+        if (!$atencion) {
+            return $this->utilidades->buildResponse(false, 'failed', 400, 'La atención a mesa no existe');
+        }
+
+        // Actualizar el estado de la atención
+        $this->db->set('estado', 'finalizada');
+        $this->db->where('id', $atencion_id);
+        $this->db->update('atencion_mesa');
+        
+        $this->db->set('estado', 'disponible');
+        $this->db->where('id', $atencion->mesa_id);
+        $this->db->update('mesas');
+
+        return $this->utilidades->buildResponse(true, 'success', 200, 'Estado de atención actualizado correctamente');
     }
 
 }
